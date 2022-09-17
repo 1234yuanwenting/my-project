@@ -1,0 +1,35 @@
+//客户端只需要一个套接字进行连接
+#include "stdio.h"
+  2 #include "stdlib.h"
+  3 #include "unistd.h"
+  4 #include "assert.h"
+  5 #include "sys/socket.h"
+  6 #include "string.h"
+  7 #include "netinet/in.h"
+  8 #include "arpa/inet.h"
+  9 int main()
+ 10 {
+ 11    int sockfd= socket(AF_INET,SOCK_STREAM,0);
+ 12    assert(sockfd!=-1);
+ 13    struct sockaddr_in saddr;
+ 14    memset(&saddr,0,sizeof(saddr));
+ 15    saddr.sin_family=AF_INET;
+ 16    saddr.sin_port=htons(6000);
+ 17    saddr.sin_addr.s_addr=inet_addr("127.0.0.1");//使用服务器的ip
+ 18    int res=connect(sockfd,(struct sockaddr*)&saddr,sizeof(saddr));
+//客户与服务器建立连接，saddr是服务器监听的socket地址
+ 19 assert(res!=-1);
+ 20 while(1)
+ 21 {
+ 22 printf("input:\n");
+ 23 char buff[128]={0};
+ 24 fgets(buff,127,stdin);
+ 25 if(strncmp(buff,"end",3)==0)
+ 26 {break;}
+ 27 send(sockfd,buff,strlen(buff),0);//send往socket上写入数据
+ 28 memset(buff,0,128);//清空数组
+ 29 recv(sockfd,buff,127,0);//读取socket上的数据
+ 30 printf("read:%s\n",buff);}
+ 31 close(sockfd);
+ 32 exit(0);}
+~             

@@ -1,0 +1,52 @@
+//服务器
+#include "stdio.h"
+  2 #include "stdlib.h"
+  3 #include "unistd.h"
+  4 #include "assert.h"
+  5 #include "sys/socket.h"
+  6 #include "string.h"
+  7 #include "netinet/in.h"
+  8 #include "arpa/inet.h"
+  9 int main()
+ 10 {//fuwuqi
+ 11    int sockfd= socket(AF_INET,SOCK_STREAM,0);创建套接字，成功返回套接字的文件描述
+符，失败返回-1//此套接字是用来监听的
+ 12    assert(sockfd!=-1);
+ 13    struct sockaddr_in saddr,caddr;//tcp协议族
+ 14    memset(&saddr,0,sizeof(saddr));//清空变量
+ 15    saddr.sin_family=AF_INET;//地址族，AF_INET
+ 16    saddr.sin_port=htons(6000);//端口，16位的端口
+ 17    saddr.sin_addr.s_addr=inet_addr("127.0.0.1");//一个结构体，只有一个成员，存放
+ip地址，32位,inet_addr字符串表示的ipv4转化为网络字节序
+ 18 
+ 19  int res= bind(sockfd,(struct sockaddr *)&saddr,sizeof(saddr));
+ 20          assert(res!=-1);//bind()将sockfd与一个sockfd地址绑定,(struct sockaddr *)
+&saddr是将专用socket地址(ipv4/ipv6)强转为通用socket地址，sizeof(saddr)是socket地址的
+长度
+ 21 listen (sockfd,5);//创建一个监听队列存储待处理的客户连接，成功返回0，失败-1
+sockfd是被监听的sockfd套接字,处于完全连接状态的socket上限为5
+ 22 while(1)
+ 23 {
+ 24 int len=sizeof(saddr);
+ 25 printf("accept wait...\n");
+ 26 int c=accept(sockfd,(struct sockaddr *)&caddr,&len);//从listen监听队列中接收一个
+连接，失败返回-1，成功返回一个新的连接socket,caddr用来被接收连接的远端socket地址，指
+定该socket地址的长度，
+ 27 
+ 28 
+ 29 if(c<0)
+ 30 {continue;}
+ 31 printf("accept c=%d\n",c);
+ 32 while(1)
+ 33 {
+ 34 char buff[128]={0};
+ 35 recv(c,buff,127,0);//recv读取sockfd上的数据，buff和len参数分别指定缓冲区的位置和
+大小
+ 36 printf("buff=%s\n", buff);
+ 37 send(c,"ok",2,0);}//send往socket上写入数据，buff和len分别指定缓冲区的位置和大小
+flag为数据收发提供了额外的控制
+ 38 close(c);}//关闭一个连接
+ 39 exit(0);
+ 40 }
+ 41 
+                           
